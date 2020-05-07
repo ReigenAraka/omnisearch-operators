@@ -125,11 +125,11 @@ class EmbedFaces:
         return ["png", "jpg", "jepg"]
 
     @property
-    def field(self):
+    def input(self):
         return "image"
 
     @property
-    def target_field(self):
+    def output(self):
         return "vector"
 
     @property
