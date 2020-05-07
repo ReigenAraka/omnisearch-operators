@@ -1,0 +1,23 @@
+WARNING:tensorflow:From server.py:14: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+WARNING:tensorflow:From server.py:22: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+WARNING:tensorflow:From server.py:23: The name tf.keras.backend.set_session is deprecated. Please use tf.compat.v1.keras.backend.set_session instead.
+
+WARNING:tensorflow:From /home/byron/Documents/python-project/omnisearch/venv/lib/python3.7/site-packages/keras/backend/tensorflow_backend.py:4070: The name tf.nn.max_pool is deprecated. Please use tf.nn.max_pool2d instead.
+
+WARNING:tensorflow:From /home/byron/Documents/python-project/omnisearch/venv/lib/python3.7/site-packages/keras/backend/tensorflow_backend.py:422: The name tf.global_variables is deprecated. Please use tf.compat.v1.global_variables instead.
+
+INFO:root:test
+2020-05-06 18:55:06,717 - tensorflow - WARNING - From server.py:14: The name tf.ConfigProto is deprecated. Please use tf.compat.v1.ConfigProto instead.
+
+2020-05-06 18:55:06,717 - tensorflow - WARNING - From server.py:22: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2020-05-06 18:55:06,728 - tensorflow - WARNING - From server.py:23: The name tf.keras.backend.set_session is deprecated. Please use tf.compat.v1.keras.backend.set_session instead.
+
+2020-05-06 18:55:06,748 - tensorflow - WARNING - From /home/byron/Documents/python-project/omnisearch/venv/lib/python3.7/site-packages/keras/backend/tensorflow_backend.py:4070: The name tf.nn.max_pool is deprecated. Please use tf.nn.max_pool2d instead.
+
+2020-05-06 18:55:07,095 - tensorflow - WARNING - From /home/byron/Documents/python-project/omnisearch/venv/lib/python3.7/site-packages/keras/backend/tensorflow_backend.py:422: The name tf.global_variables is deprecated. Please use tf.compat.v1.global_variables instead.
+
+2020-05-06 18:55:08,791 - root - INFO - test
+2020-05-06 18:55:11,653 - root - INFO - test
