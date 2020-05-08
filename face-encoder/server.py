@@ -1,19 +1,21 @@
 import os
+import logging
 import grpc
 from concurrent import futures
 import rpc.rpc_pb2, rpc.rpc_pb2_grpc
-from face_embedding import run, face_encoder as encoder
+from face_embedding import run, EmbedFaces as Encoder
 
 ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50004")
 
 
 class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
     def __init__(self):
-        pass
+        self.encoder = Encoder()
 
     def Execute(self, request, context):
+        logging.info("execute")
         grpc_vectors = []
-        vectors = run(request.datas, request.urls)
+        vectors = run(self.encoder, request.datas, request.urls)
         for vector in vectors:
             v = rpc.rpc_pb2.Vector(element=vector)
             grpc_vectors.append(v)
@@ -22,9 +24,12 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
                                         metadata=[])
 
     def Healthy(self, request, context):
+        logging.info("healthy")
         return rpc.rpc_pb2.HealthyReply(healthy="healthy")
 
     def Identity(self, request, context):
+        logging.info("identity")
+        encoder = self.encoder
         return rpc.rpc_pb2.IdentityReply(name=encoder.name,
                                          endpoint=ENDPOINT,
                                          type=encoder.type,
@@ -34,13 +39,17 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
                                          metricType=encoder.metric_type)
 
 
-def serve():
+def serve(port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     rpc.rpc_pb2_grpc.add_OperatorServicer_to_server(OperatorServicer(), server)
-    server.add_insecure_port('[::]:50004')
+    server.add_insecure_port('[::]:%s' % port)
     server.start()
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    serve()
+    formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level=logging.INFO, format=formatter)
+    port = ENDPOINT.split(":")[-1]
+    logging.info("Start server")
+    serve(port)

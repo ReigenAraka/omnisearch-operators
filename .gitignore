@@ -1,3 +1,5 @@
 **/tmp/*
 .idea
-face-encoder/data/20170512-110547/
+face-encoder/data/20170512-110547*
+server.log
+**/__pycache__

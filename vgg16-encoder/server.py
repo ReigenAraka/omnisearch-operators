@@ -18,7 +18,7 @@ def keras_config():
     )
 
     config.gpu_options.allow_growth = True
-    config.gpu_options.per_process_gpu_memory_fraction = 0.6
+    config.gpu_options.per_process_gpu_memory_fraction = 0.3
     session = tf.Session(config=config)
     keras.backend.set_session(session)
     return session
@@ -61,14 +61,14 @@ class OperatorServicer(vggrpc.rpc_pb2_grpc.OperatorServicer):
 def serve(port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     vggrpc.rpc_pb2_grpc.add_OperatorServicer_to_server(OperatorServicer(), server)
-    server.add_insecure_port('[::]:%s'%port)
+    server.add_insecure_port('[::]:%s' % port)
     server.start()
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
     formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename='vgg.log', level=logging.INFO, format=formatter)
+    logging.basicConfig(filename='server.log', level=logging.INFO, format=formatter)
     port = ENDPOINT.split(":")[-1]
     logging.info("Start server")
     serve(port)
