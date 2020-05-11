@@ -68,7 +68,7 @@ def serve(port):
 
 if __name__ == "__main__":
     formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename='server.log', level=logging.INFO, format=formatter)
+    logging.basicConfig(level=logging.INFO, format=formatter)
     port = ENDPOINT.split(":")[-1]
     logging.info("Start server")
     serve(port)

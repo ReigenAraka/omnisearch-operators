@@ -1,7 +1,4 @@
-# default cpu version base
-ARG base_tag=ubuntu:bionic-20200219
-
-From ${base_tag}
+From nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 RUN mkdir -p /app
@@ -12,7 +9,8 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
     && sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
     && rm -f /etc/apt/sources.list.d/cuda.list \
     && rm -f /etc/apt/sources.list.d/nvidia-ml.list \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && sed -i 's/tensorflow/tensorflow-gpu/g' /app/requirements.txt
 
 RUN apt-get update --fix-missing \
     && apt-get install -y python3 \

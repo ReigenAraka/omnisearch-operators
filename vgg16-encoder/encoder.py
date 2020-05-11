@@ -1,5 +1,6 @@
-import os
 import uuid
+import time
+import logging
 import urllib.request, urllib.error, urllib.parse
 from keras.applications.vgg16 import VGG16
 from keras.applications.vgg16 import preprocess_input as preprocess_input_vgg
@@ -84,7 +85,9 @@ def save_from_base64(name, file_data=None):
             extension = data_type.split(";")[0]
             encode_method = data_type.split(";")[1]
             if encode_method != "base64":
-                raise DecodeError("Encode method not base64")
+                logging.error("Encode method not base64")
+                raise
+                # raise DecodeError("Encode method not base64")
             imgstring = img_data[1]
         else:
             imgstring = img_data[0]
@@ -98,6 +101,7 @@ def save_from_base64(name, file_data=None):
 
 def run(vgg, images, urls):
     vectors = []
+    start = time.time()
     if images:
         for img in images:
             file_name = "{}-{}".format("processor", uuid.uuid4().hex)
@@ -111,4 +115,6 @@ def run(vgg, images, urls):
             if image_path:
                 vector = vgg.extract_feature(image_path)
                 vectors.append(vector)
+    end = time.time()
+    logging.info('%s cost: {:.3f}s'.format(end - start), "xception")
     return vectors
