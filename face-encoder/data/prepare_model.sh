@@ -1,4 +1,5 @@
 #!/bin/bash -ex
+## model url from facenet
 url='https://storage.googleapis.com/esper/models/facenet/20170512-110547.tar.gz'
 file='20170512-110547.tar.gz'
 dir='20170512-110547'
