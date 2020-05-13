@@ -2,7 +2,8 @@ import os
 import logging
 import grpc
 from concurrent import futures
-import rpc.rpc_pb2, rpc.rpc_pb2_grpc
+import rpc.rpc_pb2
+import rpc.rpc_pb2_grpc
 from xception import run, Xception as Encoder
 
 ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50012")

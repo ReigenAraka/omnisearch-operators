@@ -4,7 +4,8 @@ import grpc
 from concurrent import futures
 import tensorflow as tf
 from tensorflow import keras
-import vggrpc.rpc_pb2, vggrpc.rpc_pb2_grpc
+import vggrpc.rpc_pb2
+import vggrpc.rpc_pb2_grpc
 from encoder import Vgg, run
 
 ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50003")
