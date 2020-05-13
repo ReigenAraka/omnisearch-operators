@@ -6,7 +6,7 @@ import rpc.rpc_pb2
 import rpc.rpc_pb2_grpc
 from face_detector import run, MTCNNDetectFace as Detector
 
-ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:51001")
+ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50005")
 
 
 class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
@@ -18,7 +18,7 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
         grpc_metas = []
         result_images = run(self.detector, request.datas, request.urls)
         for result_image in result_images:
-            meta = rpc.rpc_pb2.MetaData(data = result_image)
+            meta = rpc.rpc_pb2.MetaData(data = result_image[0].encode())
             grpc_metas.append(meta)
         return rpc.rpc_pb2.ExecuteReply(nums=len(grpc_metas),
                                         vectors=[],
