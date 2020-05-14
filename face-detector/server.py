@@ -17,8 +17,8 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
         logging.info("execute")
         grpc_metas = []
         result_images = run(self.detector, request.datas, request.urls)
-        for result_image in result_images:
-            meta = rpc.rpc_pb2.MetaData(data = result_image[0].encode())
+        for result_image in result_images[0]:
+            meta = rpc.rpc_pb2.MetaData(data = result_image.encode())
             grpc_metas.append(meta)
         return rpc.rpc_pb2.ExecuteReply(nums=len(grpc_metas),
                                         vectors=[],
