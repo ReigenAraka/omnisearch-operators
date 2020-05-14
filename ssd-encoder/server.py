@@ -6,7 +6,7 @@ import rpc.rpc_pb2
 import rpc.rpc_pb2_grpc
 from ssd import run, SSDDetectObject as Detector
 
-ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50005")
+ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:50006")
 
 
 class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
@@ -17,7 +17,7 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
         logging.info("execute")
         grpc_metas = []
         result_images = run(self.detector, request.datas, request.urls)
-        # ensure len of url/data is 1
+        # ensure len of urls/datas is 1
         result_images = result_images[0]
         for result_image in result_images:
             data = rpc.rpc_pb2.MetaData(data=bytes(result_image, encoding='utf-8'))
