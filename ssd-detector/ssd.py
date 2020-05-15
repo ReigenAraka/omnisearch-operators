@@ -105,7 +105,7 @@ class SSDDetectObject:
             config.gpu_options.per_process_gpu_memory_fraction = gpu_mem_limit
             # for device debug info print
             if os.environ.get("log_device_placement", False):
-                config.log_device_placement = True
+                self.user_config.log_device_placement = True
             logging.info("device id %s, gpu memory limit: %f",
                          self.device_str, gpu_mem_limit)
 
@@ -164,17 +164,6 @@ class SSDDetectObject:
             obj_images.append(frame_object)
         return obj_images
 
-    @staticmethod
-    def get_label(bboxes):
-        obj_labels = []
-        for i, frame_bboxes in enumerate(bboxes):
-            frame_object = []
-            for j, bboxes in enumerate(frame_bboxes):
-                tmp_label = bboxes.label
-                frame_object.append(tmp_label)
-            obj_labels.append(frame_object)
-        return obj_labels
-
     def execute(self, image):
         objs = self.bulk_execute([image])
         return objs[0]
@@ -193,8 +182,7 @@ class SSDDetectObject:
                         image_tensor: np.concatenate(np.expand_dims(images, axis=0), axis=0)})
                     bboxes = self.get_bboxes(images, boxes, scores, classes)
                     logging.debug(bboxes)
-                    # objs = self.get_obj_image(images, bboxes)
-                    objs = self.get_label(bboxes)
+                    objs = self.get_obj_image(images, bboxes)
                     return objs
 
     @property
@@ -215,7 +203,7 @@ class SSDDetectObject:
 
     @property
     def output(self):
-        return "tags"
+        return "images"
 
     @property
     def dimension(self):

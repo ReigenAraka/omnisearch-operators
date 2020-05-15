@@ -69,7 +69,10 @@ LOCAL_TMP_PATH = "./tmp/"
 
 def save_from_url(path, name, url):
     try:
+        start = time.time()
         urllib.request.urlretrieve(url, path + name + ".jpg")
+        end = time.time()
+        logging.info('  save_tmp_file cost: {:.3f}s'.format(end - start))
         return path + name + ".jpg"
     except Exception:
         return ""
@@ -116,5 +119,6 @@ def run(vgg, images, urls):
                 vector = vgg.extract_feature(image_path)
                 vectors.append(vector)
     end = time.time()
-    logging.info('%s cost: {:.3f}s'.format(end - start), "xception")
+    logging.info('%s cost: {:.3f}s, get %d results'.format(end - start),
+                 "vgg16", len(vectors))
     return vectors
