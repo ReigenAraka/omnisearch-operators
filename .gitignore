@@ -6,3 +6,5 @@ server.log
 ssd-detector
 ssd-encoder/data/ssd_mobilenet_v1_coco_2017_11_17
 mask-rcnn-detector/data/mask_rcnn_coco.h5
+
+yolov3*
