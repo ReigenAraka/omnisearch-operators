@@ -227,6 +227,7 @@ class SSDDetectObject:
 
 
 def save_tmp_file(name, file_data=None, url=None):
+    start = time.time()
     extension = 'jpg'
     file_path = os.path.join(LOCAL_TMP_PATH, name + '.' + extension)
     if file_data:
@@ -253,6 +254,8 @@ def save_tmp_file(name, file_data=None, url=None):
             logging.error("Download file from url error : %s", str(e), exc_info=True)
             raise
             # raise DownloadFileError("Download file from url %s" % url, e)
+    end = time.time()
+    logging.info('  save_tmp_file cost: {:.3f}s'.format(end - start))
     return file_path
 
 
@@ -280,23 +283,3 @@ def run(detector, images, urls):
     end = time.time()
     logging.info('%s cost: {:.3f}s'.format(end - start), "ssd detector")
     return result_images
-
-
-# todo: just for test, delete it when ok
-if __name__ == "__main__":
-    detector = SSDDetectObject()
-    # url = "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1895204225,2410466361&fm=26&gp=0.jpg"
-    # url = 'https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1589339704&di=b1af59201e401849ae9898ef0d854cb2&src=http://upload.fjii.com/2018/1020/1540020616285.jpg'
-    # url = 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1080913669,3502446330&fm=26&gp=0.jpg'
-    # url = 'http://b-ssl.duitang.com/uploads/blog/201307/18/20130718170434_GNAGv.jpeg'
-    # url = 'http://gss0.baidu.com/-4o3dSag_xI4khGko9WTAnF6hhy/zhidao/pic/item/9213b07eca806538b01f3a3696dda144ad34821a.jpg'
-    # url = 'http://00.minipic.eastday.com/20160714/20160714000053_d41d8cd98f00b204e9800998ecf8427e_17.jpeg'
-    # url = 'http://pic4.zhimg.com/50/v2-76f385cf0b54a8a2c7e826e8ee0decc4_hd.jpg'
-    # url = 'https://up.enterdesk.com/edpic_source/0a/98/c1/0a98c103d73f5fab915a447860701e53.jpg'
-    # url = 'http://pic1.win4000.com/mobile/2020-04-17/5e995f7e6a194.jpg'
-    # url = 'http://pic1.win4000.com/mobile/2020-04-17/5e995f81a7e76.jpg'
-    # url = 'http://pic1.win4000.com/mobile/2020-04-17/5e995f85ba60f.jpg'
-    # url = "http://5b0988e595225.cdn.sohucs.com/images/20180303/8e09f1dfa6c1484697d50124c368182a.jpeg"
-    url = "http://thumbs.dreamstime.com/z/%E4%BA%BA%E5%92%8C%E7%8B%97-50640419.jpg"
-    a = run(detector, None, urls=[url])
-    print(a)
