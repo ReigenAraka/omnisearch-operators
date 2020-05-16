@@ -8,3 +8,4 @@ ssd-detector/data/ssd_mobilenet_v1_coco_2017_11_17
 mask-rcnn-detector/data/mask_rcnn_coco.h5
 
 yolov3-detector/data/yolov3_darknet
+paddlehub-processor
