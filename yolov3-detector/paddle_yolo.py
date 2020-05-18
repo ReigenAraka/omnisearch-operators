@@ -18,7 +18,7 @@ def temp_directory():
 
 
 COCO_MODEL_PATH = os.path.join(temp_directory(), "yolov3_darknet")
-YOLO_CONFIG_PATH = os.path.join(temp_directory(), "yolo.yml")
+YOLO_CONFIG_PATH = os.path.join(COCO_MODEL_PATH, "yolo.yml")
 LOCAL_TMP_PATH = "./tmp/"
 
 
