@@ -9,3 +9,4 @@ mask-rcnn-detector/data/mask_rcnn_coco.h5
 
 yolov3-detector/data/yolov3_darknet
 paddlehub-processor
+vgg19-encoder
