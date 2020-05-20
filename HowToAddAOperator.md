@@ -250,4 +250,4 @@ P.S. 以上所有流程都是为了能够快速实现而列出的事项。 如�
 
 当然如果是类似的利用 Keras-Application 来实现 Operator, 更推荐使用 xception-encoder 做 example code.
 
-# todo: add more result pictures and code details pictures
+### todo: add more result pictures and code details pictures
