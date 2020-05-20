@@ -4,7 +4,7 @@ import grpc
 from concurrent import futures
 import rpc.rpc_pb2
 import rpc.rpc_pb2_grpc
-from custom_operator import run, CustomOperator as Processor
+from custom_operator import run, CustomOperator as Operator
 
 
 ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:52001")
@@ -12,12 +12,12 @@ ENDPOINT = os.getenv("OP_ENDPOINT", "127.0.0.1:52001")
 
 class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
     def __init__(self):
-        self.processor = Processor()
+        self.operator = Operator()
 
     def Execute(self, request, context):
         logging.info("execute")
         grpc_metas = []
-        result_images = run(self.processor, request.datas, request.urls)
+        result_images = run(self.operator, request.datas, request.urls)
         result_images = result_images[0]
         for result_image in result_images:
             data = rpc.rpc_pb2.MetaData(data=bytes(result_image, encoding='utf-8'))
@@ -32,14 +32,14 @@ class OperatorServicer(rpc.rpc_pb2_grpc.OperatorServicer):
 
     def Identity(self, request, context):
         logging.info("identity")
-        processor = self.processor
-        return rpc.rpc_pb2.IdentityReply(name=processor.name,
-                                         enpdpoint=ENDPOINT,
-                                         type=processor.type,
-                                         input=processor.input,
-                                         output=processor.output,
-                                         dimension=processor.dimension,
-                                         metricType=processor.metric_type)
+        operator = self.operator
+        return rpc.rpc_pb2.IdentityReply(name=operator.name,
+                                         endpoint=ENDPOINT,
+                                         type=operator.type,
+                                         input=operator.input,
+                                         output=operator.output,
+                                         dimension=operator.dimension,
+                                         metricType=operator.metric_type)
 
 
 def serve(port):

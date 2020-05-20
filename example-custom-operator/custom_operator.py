@@ -5,7 +5,6 @@ import logging
 import urllib.request
 import time
 import numpy as np
-import cv2
 import tensorflow as tf
 
 
