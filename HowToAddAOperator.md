@@ -22,7 +22,7 @@
 
 4. 调整```server.py```中对 customer_operator 的调用逻辑，使 grpc 服务返回正确的结果。
 
-5.  构建 docker 镜像，并启动容器进行测试。
+5. 调整编译选项, 构建 docker 镜像, 并启动容器进行测试。
 
 进阶自定义选项：
 - 修改 ```server.py``` 中 ```ENDPOINT``` 默认端口. 推荐同时更改 ```Dockerfile``` 中的 Expose 的端口, 以求更完善的 docker 使用体验。
@@ -210,12 +210,46 @@ P.S. 以上所有流程都是为了能够快速实现而列出的事项。 如�
                                         metadata=[])
     ```
 
-5.  构建 docker 镜像，并启动容器进行测试。
-
-	以下是 cpu 版本的相关步骤:
-    1. 运行 ```make cpu``` 命令构建 docker 镜像。
-    2. 运行 ```make test-cpu``` 命令创建一个容器, 并测试容器暴露出的 grpc 服务.
-	
+5.  调整编译选项, 构建 docker 镜像, 并启动容器进行测试。
+    
+	以下是 cpu 版本的相关事项:
+	1. 因为 keras application 会到指定位置读取模型, 需要在 Dockerfile 中添加相关逻辑, 以下是一种实现方式:
+	    ```dockerfile
+        RUN apt-get update --fix-missing \
+            && apt-get install -y python3 \
+            python3-pip wget \
+            libglib2.0-0 libsm6 \
+            libxext6 libxrender1 \
+            && apt-get clean \
+            && rm -rf /var/lib/apt/lists/* \
+            && cd /app/data \
+            && ./prepare_model.sh \
+            && cd - \
+            && mkdir tmp \
+            && mkdir -p /root/.keras/models && mv /app/data/*.h5 /root/.keras/models
+        ```
+    2. 运行 ```make cpu``` 命令构建 docker 镜像。
+    3. 运行 ```make test-cpu``` 命令创建一个容器, 并测试容器暴露出的 grpc 服务.下面是一次成功的测试结果:
+        ```bash
+        $ make test-cpu                                    
+        docker run -p 53001:53001 \
+        -e OP_ENDPOINT=127.0.0.1:53001 -v `pwd`/tmp:/app/tmp \
+        --name "custom-operator-cpu-test" -d zilliz/custom-operator:3be7e9e
+        bbfc5a87e9e3d28be867be63fb092e14449129a1b03a052eb0b1988a7d692855
+        echo "sleep 15s for waiting container to init and warmup" && sleep 15s
+        sleep 15s for waiting container to init and warmup
+        python3 ../test_grpc.sh.py -e 127.0.0.1:53001 || echo "[ERROR] test grpc failed"
+        [*] Endpoint is  127.0.0.1:53001
+        Begin to test: endpoint-127.0.0.1:53001
+        Endpoint information:  {'name': 'vgg19', 'endpoint': '127.0.0.1:53001', 'type': 'encoder', 'input': 'image', 'output': 'vector', 'dimension': '512', 'metric_type': 'L2'}
+        Endpoint health:  healthy
+        Result :
+          vector size: 1;  data size: 0
+          vector dim:  512
+        All tests over.
+        docker rm -f "custom-operator-cpu-test"
+        custom-operator-cpu-test
+        ```
 
 ### todo: add more result pictures and code details pictures
 
