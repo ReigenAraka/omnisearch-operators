@@ -23,27 +23,22 @@
     1. 找到vgg19的notop模型地址：```https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5```
     2. 在 ```prepare_model.sh``` 中通过 wget 命令下载该模型，并进行相关判断。以下是一种实现方式：
         ```shell
-        file=vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5
+        file=models/vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5
         url=https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5
         
         if [[ ! -f "${file}" ]]; then
-          echo "[INFO] Model tar package does not exist, begin to download..."
-          wget ${url}
-          echo "[INFO] Model tar package download successfully!"
+           mkdir -p models
+           echo "[INFO] Model tar package does not exist, begin to download..."
+           wget ${url} -O ${file}
+           echo "[INFO] Model tar package download successfully!"
         fi
         
         if [[ -f "${file}" ]];then
-          echo "[INFO] Model has been prepared successfully!"
-          exit 0
+           echo "[INFO] Model has been prepared successfully!"
+           exit 0
         fi
         ```
     3. 运行该脚本确保可以正常下载该模型文件。
-    4. 如果进行本地调试，执行以下步骤以便使 keras-application 可以导入该模型：
-        ```bash
-        mkdir -p ~/.keras/models
-        cp data/*.h5 ~/.keras/models
-        ```
-       此步骤非必须。可以理解为将模型移动到机器学习框架默认导入位置。
        
 3. 在 ```custom_operator.py``` 中定义关于 ```CustomOperator``` 的所有逻辑；并根据实际需要完善 requirements.txt 和 requirements-gpu.txt。
     1. 下面列出的是 vgg19 的一种实现方式, 主要参考了 Keras-Application 中 vgg19 的样例:
@@ -63,113 +58,124 @@
         from utils import save_tmp_file
         
         
+        def model_data_dir():
+            return os.path.abspath(os.path.join('.', 'data'))
+        
+        
+        # set keras default model path
+        os.environ['KERAS_HOME'] = model_data_dir()
+        
+        
         class CustomOperator:
-           def __init__(self):
-               self.model_init = False
-               self.user_config = self.get_operator_config()
+            def __init__(self):
+                self.model_init = False
+                self.user_config = self.get_operator_config()
         
-               self.graph = tf.Graph()
-               with self.graph.as_default():
-                   with tf.device(self.device_str):
-                       self.session = tf.Session(config=self.user_config)
-                       KTF.set_session(self.session)
-                       self.model = VGG19(weights='imagenet', include_top=False, pooling='avg')
-                       self.graph = KTF.get_graph()
-                       self.session = KTF.get_session()
-                       self.model.trainable = False
-                       # warmup
-                       self.model.predict(np.zeros((1, 224, 224, 3)))
-               logging.info("Succeeded to warmup, Now grpc service is available.")
+                self.graph = tf.Graph()
+                with self.graph.as_default():
+                    with tf.device(self.device_str):
+                        self.session = tf.Session(config=self.user_config)
+                        KTF.set_session(self.session)
+                        self.model = VGG19(
+                            weights='imagenet',
+                            include_top=False,
+                            pooling='avg')
+                        self.graph = KTF.get_graph()
+                        self.session = KTF.get_session()
+                        self.model.trainable = False
+                        # warmup
+                        self.model.predict(np.zeros((1, 224, 224, 3)))
+                logging.info("Succeeded to warmup, Now grpc service is available.")
         
-           def get_operator_config(self):
-               try:
-                   self.device_str = os.environ.get("device_id", "/cpu:0")
-                   config = tf.ConfigProto(allow_soft_placement=True)
-                   config.gpu_options.allow_growth = True
-                   gpu_mem_limit = float(os.environ.get("gpu_mem_limit", 0.3))
-                   config.gpu_options.per_process_gpu_memory_fraction = gpu_mem_limit
-                   # for device debug info print
-                   if os.environ.get("log_device_placement", False):
-                       self.user_config.log_device_placement = True
-                   logging.info("device id %s, gpu memory limit: %f",
-                                self.device_str, gpu_mem_limit)
+            def get_operator_config(self):
+                try:
+                    self.device_str = os.environ.get("device_id", "/cpu:0")
+                    config = tf.ConfigProto(allow_soft_placement=True)
+                    config.gpu_options.allow_growth = True
+                    gpu_mem_limit = float(os.environ.get("gpu_mem_limit", 0.3))
+                    config.gpu_options.per_process_gpu_memory_fraction = gpu_mem_limit
+                    # for device debug info print
+                    if os.environ.get("log_device_placement", False):
+                        self.user_config.log_device_placement = True
+                    logging.info("device id %s, gpu memory limit: %f",
+                                 self.device_str, gpu_mem_limit)
         
-               except Exception as e:
-                   logging.error(
-                       "unexpected error happen during read config",
-                       exc_info=True)
-                   raise e
-               logging.info(
-                   "Model device str: %s, session config: %s",
-                   self.device_str, config)
-               return config
+                except Exception as e:
+                    logging.error(
+                        "unexpected error happen during read config",
+                        exc_info=True)
+                    raise e
+                logging.info(
+                    "Model device str: %s, session config: %s",
+                    self.device_str, config)
+                return config
         
-           def execute(self, img_path):
-               img = image.load_img(img_path, target_size=(224, 224))
-               x = image.img_to_array(img)
-               x = np.expand_dims(x, axis=0)
-               x = preprocess_input(x)
-               with self.graph.as_default():
-                   with tf.device(self.device_str):
-                       with self.session.as_default():
-                           features = self.model.predict(x)
-                           norm_feature = features[0] / LA.norm(features[0])
-                           norm_feature = [i.item() for i in norm_feature]
-                           return norm_feature
+            def execute(self, img_path):
+                img = image.load_img(img_path, target_size=(224, 224))
+                x = image.img_to_array(img)
+                x = np.expand_dims(x, axis=0)
+                x = preprocess_input(x)
+                with self.graph.as_default():
+                    with tf.device(self.device_str):
+                        with self.session.as_default():
+                            features = self.model.predict(x)
+                            norm_feature = features[0] / LA.norm(features[0])
+                            norm_feature = [i.item() for i in norm_feature]
+                            return norm_feature
         
-           def bulk_execute(self, img_paths):
-               result = []
-               for img_path in img_paths:
-                   result.append(self.execute(img_path))
-               return result
+            def bulk_execute(self, img_paths):
+                result = []
+                for img_path in img_paths:
+                    result.append(self.execute(img_path))
+                return result
         
-           def run(self, images, urls):
-               result_images = []
-               start = time.time()
-               try:
-                   if images:
-                       for img in images:
-                           file_name = "{}-{}".format("processor", uuid.uuid4().hex)
-                           image_path = save_tmp_file(file_name, file_data=img)
-                           if image_path:
-                               result_images.append(self.execute(image_path))
-                   else:
-                       for url in urls:
-                           file_name = "{}-{}".format("processor", uuid.uuid4().hex)
-                           image_path = save_tmp_file(file_name, url=url)
-                           if image_path:
-                               result_images.append(self.execute(image_path))
-               except Exception as e:
-                   logging.error("something error: %s", str(e), exc_info=True)
-                   pass
-               end = time.time()
-               logging.info('%s cost: {:.3f}s, get %d results'.format(end - start),
-                            "custom processor", len(result_images))
-               return result_images
+            def run(self, images, urls):
+                result_images = []
+                start = time.time()
+                try:
+                    if images:
+                        for img in images:
+                            file_name = "{}-{}".format("processor", uuid.uuid4().hex)
+                            image_path = save_tmp_file(file_name, file_data=img)
+                            if image_path:
+                                result_images.append(self.execute(image_path))
+                    else:
+                        for url in urls:
+                            file_name = "{}-{}".format("processor", uuid.uuid4().hex)
+                            image_path = save_tmp_file(file_name, url=url)
+                            if image_path:
+                                result_images.append(self.execute(image_path))
+                except Exception as e:
+                    logging.error("something error: %s", str(e), exc_info=True)
+                    pass
+                end = time.time()
+                logging.info('%s cost: {:.3f}s, get %d results'.format(end - start),
+                             "custom processor", len(result_images))
+                return result_images
         
-           @property
-          def name(self):
-               return "vgg19"
+            @property
+            def name(self):
+                return "vgg19"
         
-           @property
-          def type(self):
-               return "encoder"
+            @property
+            def type(self):
+                return "encoder"
         
-           @property
-          def input(self):
-               return "image"
+            @property
+            def input(self):
+                return "image"
         
-           @property
-          def output(self):
-               return "vector"
+            @property
+            def output(self):
+                return "vector"
         
-           @property
-          def dimension(self):
-               return "512"
+            @property
+            def dimension(self):
+                return "512"
         
-           @property
-          def metric_type(self):
-               return "L2"
+            @property
+            def metric_type(self):
+                return "L2"
         ```
     
         上述代码实现主要完成了以下工作:
@@ -205,23 +211,8 @@
 5. 调整编译选项, 构建 docker 镜像, 并启动容器进行测试。
     以下是 cpu 版本的相关事项, gpu版本可以参照进行修改:
     
-    1. 因为 keras application 会到指定位置读取模型, 需要在 Dockerfile 中添加相关逻辑, 以下是一种实现方式:
-        ```dockerfile
-        RUN apt-get update --fix-missing \
-           && apt-get install -y python3 \
-           python3-pip wget \
-           libglib2.0-0 libsm6 \
-           libxext6 libxrender1 \
-           && apt-get clean \
-           && rm -rf /var/lib/apt/lists/* \
-           && cd /app/data \
-           && ./prepare_model.sh \
-           && cd - \
-           && mkdir tmp \
-           && mkdir -p /root/.keras/models && mv /app/data/*.h5 /root/.keras/models
-        ```
-    2. 运行 ```make cpu``` 命令构建 docker 镜像。
-    3. 运行 ```make test-cpu``` 命令创建一个容器, 并测试容器暴露出的 grpc 服务.下面是一次成功的测试结果:
+    1. 运行 ```make cpu``` 命令构建 docker 镜像。
+    2. 运行 ```make test-cpu``` 命令创建一个容器, 并测试容器暴露出的 grpc 服务.下面是一次成功的测试结果:
         ```bash
         $ make test-cpu                                   
         docker run -p 53001:53001 \
