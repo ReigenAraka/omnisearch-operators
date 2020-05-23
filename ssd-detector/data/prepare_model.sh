@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-## model url from facenet
+## model url from github
 url='http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2017_11_17.tar.gz'
 file='ssd_mobilenet_v1_coco_2017_11_17.tar.gz'
 dir='ssd_mobilenet_v1_coco_2017_11_17'
