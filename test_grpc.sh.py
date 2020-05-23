@@ -52,7 +52,7 @@ if __name__ == '__main__':
         if opt_name in ('-h', '--help'):
             print("[*] Help info")
             exit()
-        if opt_name in ('-e', '--filename'):
+        if opt_name in ('-e', '--endpoint'):
             endpoint = opt_value
             print("[*] Endpoint is ", endpoint)
             continue
