@@ -21,7 +21,7 @@ Omnisearch 当前内置了一些 Operator 可以完成最简单的使用。如�
     - 返回： 识别出的一组人脸图片
     - 样例 pipeline：mtcnn_detect_face -> face_embedding
 
-> 以 facenet 实现，使用 github 项目 https://github.com/davidsandberg/facenet.git
+> 以 facenet 实现，参考[facenet](https://github.com/davidsandberg/facenet.git) github 项目 
 
 - Mask-RCNN-object-detector
     - 镜像名： mask-rcnn-detector
@@ -39,7 +39,7 @@ Omnisearch 当前内置了一些 Operator 可以完成最简单的使用。如�
     - 返回： 识别出的一组物体图片
     - 样例pipeline：ssd -> vgg/xception
 
-> 
+> 以 tensorflow 实现的 ssd， 模型链接[]()
 
 - YOLOv3-object-detector
     - 镜像名：yolov3-detector

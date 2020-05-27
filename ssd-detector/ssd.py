@@ -166,7 +166,10 @@ class SSDDetectObject:
 
     def execute(self, image):
         objs = self.bulk_execute([image])
-        return objs[0]
+        if len(objs):
+            return objs[0]
+        else:
+            return None
 
     def bulk_execute(self, images):
         with self.graph.as_default():
@@ -187,7 +190,7 @@ class SSDDetectObject:
 
     @property
     def name(self):
-        return "ssd"
+        return "ssd-detector"
 
     @property
     def type(self):
